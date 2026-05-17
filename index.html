@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f0f1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Poetry">
+  <title>Poetry Digitalizer</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- JSZip: lets us open/modify .docx files in the browser (they are ZIP archives) -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <!-- Google Identity Services: handles Google OAuth in-browser without a backend -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 1 — SETTINGS
+       Shown on first launch or via nav.
+       Stores all credentials in localStorage.
+  ══════════════════════════════════════════ -->
+  <div id="screen-settings" class="screen">
+    <header class="app-header">
+      <h1>Poetry Digitalizer</h1>
+      <p class="subtitle">Handwriting → Manuscript</p>
+    </header>
+
+    <main class="settings-content">
+
+      <!-- Gemini API Key -->
+      <section class="settings-section">
+        <h2>AI Transcription</h2>
+        <label for="gemini-key">Gemini API Key</label>
+        <div class="input-row">
+          <input type="password" id="gemini-key"
+                 placeholder="Paste your Gemini API key"
+                 autocomplete="off" spellcheck="false">
+          <button id="btn-save-key" class="btn-secondary">Save</button>
+        </div>
+        <p class="hint">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">
+            Get your free key at Google AI Studio →
+          </a>
+        </p>
+      </section>
+
+      <!-- Google Drive -->
+      <section class="settings-section">
+        <h2>Google Drive (optional)</h2>
+        <label for="drive-client-id">Google Client ID</label>
+        <div class="input-row">
+          <input type="text" id="drive-client-id"
+                 placeholder="xxxxxxxx.apps.googleusercontent.com"
+                 autocomplete="off" spellcheck="false">
+          <button id="btn-save-drive-id" class="btn-secondary">Save</button>
+        </div>
+        <p class="hint">
+          <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">
+            Create OAuth Client ID at Google Cloud Console →
+          </a>
+        </p>
+
+        <div id="drive-connect-area" style="margin-top:14px">
+          <button id="btn-connect-drive" class="btn-storage">
+            <span class="icon">☁</span>
+            <span>Connect Google Drive</span>
+          </button>
+        </div>
+
+        <div id="drive-connected-area" class="hidden" style="margin-top:14px">
+          <p class="status-ok">✓ Google Drive connected</p>
+          <label for="manuscript-select">Default Manuscript</label>
+          <select id="manuscript-select">
+            <option value="">— Loading your files… —</option>
+          </select>
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <button id="btn-save-manuscript" class="btn-secondary" style="flex:1; margin-right:8px">
+              Set as Default
+            </button>
+            <button id="btn-disconnect-drive" class="btn-link">Disconnect</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Start -->
+      <button id="btn-start" class="btn-primary btn-large">
+        Start Digitalizing
+      </button>
+      <p id="start-hint" class="hint center" style="margin-top:10px; display:none">
+        Save your Gemini API key above to continue
+      </p>
+    </main>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 2 — UPLOAD
+       Camera or gallery, single or batch.
+  ══════════════════════════════════════════ -->
+  <div id="screen-upload" class="screen hidden">
+    <header class="screen-header">
+      <button class="btn-back" data-target="settings" title="Settings">←</button>
+      <h2>Upload Poem</h2>
+      <button id="btn-history" class="btn-icon" title="Draft History">📋</button>
+    </header>
+
+    <main class="upload-content">
+
+      <!-- Drop / tap zone -->
+      <div id="drop-zone" class="drop-zone">
+        <div class="drop-zone-inner">
+          <div class="drop-icon">📸</div>
+          <p>Tap to upload or drop images here</p>
+          <p class="hint">JPG, PNG, PDF · multiple files supported</p>
+        </div>
+        <!-- accept="image/*,.pdf" opens camera on mobile -->
+        <input type="file" id="file-input-zone"
+               accept="image/*,.pdf"
+               multiple
+               class="file-input-hidden">
+      </div>
+
+      <div class="upload-actions">
+        <!-- Camera: capture="environment" opens rear camera directly -->
+        <label class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">
+          📷 Camera
+          <input type="file" id="file-input-camera"
+                 accept="image/*"
+                 capture="environment"
+                 multiple
+                 class="file-input-hidden" style="position:static;width:0;height:0">
+        </label>
+        <label class="btn-secondary" style="display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer">
+          🖼 Gallery
+          <input type="file" id="file-input-gallery"
+                 accept="image/*,.pdf"
+                 multiple
+                 class="file-input-hidden" style="position:static;width:0;height:0">
+        </label>
+      </div>
+
+      <!-- Preview thumbnails (shown after files are selected) -->
+      <div id="file-preview" class="file-preview hidden">
+        <div id="preview-thumbnails" class="thumbnail-list"></div>
+        <div class="preview-actions">
+          <button id="btn-clear-files" class="btn-link">Clear all</button>
+          <button id="btn-transcribe" class="btn-primary">
+            Transcribe →
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Draft History Drawer (slides over screen) -->
+    <div id="history-drawer" class="drawer hidden">
+      <div class="drawer-header">
+        <h3>Draft History</h3>
+        <button id="btn-close-history" class="btn-icon">✕</button>
+      </div>
+      <ul id="history-list" class="history-list"></ul>
+      <p id="history-empty" class="hint center hidden">No drafts saved yet.</p>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 3 — PROCESSING
+       Shows while Gemini is working.
+  ══════════════════════════════════════════ -->
+  <div id="screen-processing" class="screen hidden">
+    <main class="processing-content">
+      <div class="processing-animation">
+        <div class="pulse-ring"></div>
+        <div class="pulse-icon">✍️</div>
+      </div>
+      <h2 id="processing-title">Transcribing…</h2>
+      <p id="processing-status">Reading your handwriting</p>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <p id="processing-page" class="hint center"></p>
+    </main>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       SCREEN 4 — EDIT
+       Three view modes: A (split), B (text), C (doc).
+       Photo + text always visible together.
+  ══════════════════════════════════════════ -->
+  <div id="screen-edit" class="screen hidden">
+
+    <header class="screen-header">
+      <button class="btn-back" data-target="upload" title="Back">←</button>
+      <h2>Edit Poem</h2>
+      <button id="btn-save-draft" class="btn-icon" title="Save to History">💾</button>
+    </header>
+
+    <!-- Multi-page navigator (hidden for single image) -->
+    <div id="page-nav" class="page-nav hidden">
+      <button id="btn-prev-page" class="btn-page" disabled>‹</button>
+      <span id="page-indicator">Page 1 of 1</span>
+      <button id="btn-next-page" class="btn-page">›</button>
+    </div>
+
+    <!-- Mode switcher -->
+    <div class="mode-tabs" role="tablist">
+      <button class="mode-tab active" data-mode="A" role="tab" aria-selected="true">
+        ⬛⬜ Split
+      </button>
+      <button class="mode-tab" data-mode="B" role="tab" aria-selected="false">
+        📝 Text
+      </button>
+      <button class="mode-tab" data-mode="C" role="tab" aria-selected="false">
+        📄 Doc
+      </button>
+    </div>
+
+    <main class="edit-content">
+
+      <!-- ── MODE A: Side-by-side ── -->
+      <div id="mode-A" class="edit-mode">
+        <div class="split-view">
+          <div class="split-photo">
+            <img id="photo-A" src="" alt="Original handwriting">
+          </div>
+          <div class="split-text">
+            <textarea id="text-A" class="poem-textarea"
+                      placeholder="Transcribed text will appear here…"
+                      spellcheck="true"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MODE B: Text focus with thumbnail ── -->
+      <div id="mode-B" class="edit-mode hidden">
+        <div class="mode-b-layout">
+          <div class="thumbnail-bar">
+            <img id="photo-B" src="" alt="Original" class="photo-thumbnail">
+            <span class="thumbnail-label">Original photo</span>
+          </div>
+          <textarea id="text-B" class="poem-textarea poem-textarea--large"
+                    placeholder="Transcribed text will appear here…"
+                    spellcheck="true"></textarea>
+        </div>
+      </div>
+
+      <!-- ── MODE C: Document / Word-like view ── -->
+      <div id="mode-C" class="edit-mode hidden">
+        <div class="doc-layout">
+          <div class="doc-toolbar">
+            <button class="doc-tool" data-cmd="bold" title="Bold"><strong>B</strong></button>
+            <button class="doc-tool" data-cmd="italic" title="Italic"><em>I</em></button>
+            <button class="doc-tool" data-cmd="underline" title="Underline"><u>U</u></button>
+            <span class="doc-divider">|</span>
+            <button class="doc-tool" data-cmd="justifyCenter" title="Center">⊟</button>
+            <button class="doc-tool" data-cmd="justifyLeft" title="Left">⊞</button>
+          </div>
+          <div class="doc-page">
+            <div id="text-C"
+                 class="doc-editor"
+                 contenteditable="true"
+                 data-placeholder="Transcribed text will appear here…"
+                 spellcheck="true"></div>
+          </div>
+          <div class="doc-photo-strip">
+            <img id="photo-C" src="" alt="Original" class="doc-photo-thumb">
+            <span>Original photo</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="edit-footer">
+      <button id="btn-add-manuscript" class="btn-primary btn-large">
+        Add to Manuscript →
+      </button>
+    </footer>
+
+    <!-- Success overlay (shown after saving) -->
+    <div id="success-overlay" class="overlay hidden">
+      <div class="overlay-content">
+        <div class="success-icon">✓</div>
+        <h2>Poem Saved!</h2>
+        <p id="success-message">Added to your manuscript</p>
+        <div class="overlay-actions">
+          <button id="btn-new-poem" class="btn-primary">Digitalize Another</button>
+          <a id="btn-open-drive" class="btn-secondary hidden"
+             href="#" target="_blank" rel="noopener"
+             style="display:none;text-align:center;text-decoration:none;padding:12px 24px;border-radius:8px">
+            Open in Drive ↗
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end screen-edit -->
+
+
+  <!-- Main entry point — ES module, loads all other JS -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
