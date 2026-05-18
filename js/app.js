@@ -159,6 +159,7 @@ async function handleConnectDrive() {
   try {
     await connectDrive(clientId);
     showToast('Google Drive connected ✓');
+    startSessionTimer();
   } catch (err) {
     alert(`Connection failed: ${err.message}`);
   } finally {
@@ -404,6 +405,48 @@ function showToast(message) {
   toast.style.opacity = '1';
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+// ─── Drive Session Timer ──────────────────────────────────
+// Google access tokens expire after 60 minutes.
+// At 55 min we warn the user; at 60 min we tell them the session ended.
+let _sessionTimer = null;
+
+function startSessionTimer() {
+  clearTimeout(_sessionTimer);
+  const WARN_MS = 55 * 60 * 1000;
+  const END_MS  = 60 * 60 * 1000;
+
+  _sessionTimer = setTimeout(() => {
+    showBanner(
+      '⏱ Drive session expires in 5 minutes. Finish editing or copy your text now.',
+      'warning'
+    );
+    setTimeout(() => {
+      showBanner(
+        '🔒 Drive session ended. Copy your text, then reconnect Google Drive to save.',
+        'error'
+      );
+    }, 5 * 60 * 1000);
+  }, WARN_MS);
+}
+
+function showBanner(message, type = 'warning') {
+  let banner = document.getElementById('session-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'session-banner';
+    banner.style.cssText = `
+      position:fixed; top:0; left:0; right:0; z-index:9998;
+      padding:12px 16px; font-size:13px; font-weight:600;
+      text-align:center; cursor:pointer;
+    `;
+    banner.addEventListener('click', () => banner.remove());
+    document.body.appendChild(banner);
+  }
+  banner.textContent = message + '  ✕';
+  banner.style.background = type === 'error' ? '#b91c1c' : '#92400e';
+  banner.style.color = '#fff';
 }
 
 // ─── Service Worker ───────────────────────────────────────
