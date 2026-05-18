@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy & Terms — Handwrite Digitalizer</title>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --accent: #d4a853;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.7;
+      padding: 0 0 80px;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+    }
+    header h1 { color: var(--accent); font-size: 22px; margin-bottom: 4px; }
+    header p  { color: var(--muted); font-size: 13px; }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    h2 {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    h2:first-of-type { margin-top: 0; }
+    p  { margin-bottom: 14px; color: var(--text); }
+    ul { margin: 0 0 14px 20px; }
+    li { margin-bottom: 8px; }
+    strong { color: #fff; }
+    .disclaimer-box {
+      background: rgba(212, 168, 83, 0.08);
+      border: 1px solid rgba(212, 168, 83, 0.3);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0 24px;
+    }
+    .disclaimer-box p { margin-bottom: 10px; }
+    .disclaimer-box p:last-child { margin-bottom: 0; }
+    .back-link {
+      display: inline-block;
+      margin: 32px 0 0;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .date { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+    .highlight {
+      background: rgba(74,222,128,0.08);
+      border-left: 3px solid #4ade80;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+    }
+    .highlight p { margin: 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Handwrite Digitalizer</h1>
+  <p>Privacy Policy &amp; Terms of Use</p>
+</header>
+
+<div class="container">
+  <p class="date">Last updated: May 17, 2026</p>
+
+  <!-- ── PRIVACY POLICY ── -->
+
+  <h2>Privacy Policy</h2>
+
+  <p>
+    Handwrite Digitalizer ("the app") is a browser-based tool that transcribes
+    handwritten text from photos and appends the result to a document you own.
+    This policy explains what data the app handles and how.
+  </p>
+
+  <div class="highlight">
+    <p>
+      <strong>Short version:</strong> The app has no servers, no database, and no user accounts.
+      Your content never leaves your own devices and your own Google Drive.
+      We collect nothing.
+    </p>
+  </div>
+
+  <h2>What the App Accesses</h2>
+
+  <ul>
+    <li>
+      <strong>Photos you upload</strong> — processed locally in your browser and sent
+      directly to Google's Gemini AI for transcription. They are not stored by this app
+      on any server.
+    </li>
+    <li>
+      <strong>Your Google Drive</strong> — the app requests the
+      <code>drive.file</code> permission, which grants access
+      <em>only</em> to the specific file you select through Google's own file picker.
+      The app cannot see, read, or access any other file in your Drive.
+    </li>
+    <li>
+      <strong>Your API keys</strong> — your Gemini API key and Google credentials are
+      stored only on your device using your browser's localStorage. They are never
+      transmitted to or stored by this app.
+    </li>
+  </ul>
+
+  <h2>What We Do Not Collect</h2>
+
+  <ul>
+    <li>We do not collect your name, email, or any personal information.</li>
+    <li>We do not track your usage, clicks, or sessions.</li>
+    <li>We do not use cookies or third-party analytics.</li>
+    <li>We do not store your poems, photos, or transcriptions on any server.</li>
+    <li>We do not sell, share, or monetize any data — because we have none.</li>
+  </ul>
+
+  <h2>Third-Party Services</h2>
+
+  <p>
+    The app sends your uploaded images to the following third-party services,
+    each governed by their own privacy policies:
+  </p>
+  <ul>
+    <li>
+      <strong>Google Gemini AI</strong> — receives your images for transcription.
+      Governed by <a href="https://policies.google.com/privacy" target="_blank"
+      style="color:var(--accent)">Google's Privacy Policy</a>.
+    </li>
+    <li>
+      <strong>Google Drive API</strong> — used to read and write the manuscript file
+      you select. Governed by
+      <a href="https://policies.google.com/privacy" target="_blank"
+      style="color:var(--accent)">Google's Privacy Policy</a>.
+    </li>
+  </ul>
+
+  <h2>Data Retention</h2>
+
+  <p>
+    Draft history is stored in your browser's localStorage and remains entirely
+    on your device. You can clear it at any time from your browser settings or
+    within the app. Uninstalling the app or clearing browser data removes all
+    locally stored information.
+  </p>
+
+  <h2>Children's Privacy</h2>
+
+  <p>
+    This app is not directed at children under 13. We do not knowingly collect
+    information from children.
+  </p>
+
+  <h2>Changes to This Policy</h2>
+
+  <p>
+    If this policy changes materially, the "Last updated" date above will be revised.
+    Continued use of the app after changes constitutes acceptance of the updated policy.
+  </p>
+
+  <h2>Contact</h2>
+
+  <p>
+    Questions about this privacy policy? Contact:
+    <a href="mailto:jose.angulo.valle@gmail.com"
+       style="color:var(--accent)">jose.angulo.valle@gmail.com</a>
+  </p>
+
+
+  <!-- ── TERMS OF USE & DISCLAIMER ── -->
+
+  <h2>Terms of Use</h2>
+
+  <p>
+    By using Handwrite Digitalizer, you agree to the following terms.
+    If you do not agree, please do not use the app.
+  </p>
+
+  <h2>No Warranty — App Provided "As Is"</h2>
+
+  <div class="disclaimer-box">
+    <p>
+      <strong>Handwrite Digitalizer is provided "as is" and "as available,"
+      without warranty of any kind</strong>, express or implied, including but not
+      limited to warranties of merchantability, fitness for a particular purpose,
+      or non-infringement.
+    </p>
+    <p>
+      The app may contain bugs, produce incorrect transcriptions, or behave
+      unexpectedly. You use it at your own risk.
+    </p>
+  </div>
+
+  <h2>Your Responsibility for Your Files</h2>
+
+  <div class="disclaimer-box">
+    <p>
+      <strong>The app modifies files you explicitly select.</strong>
+      When you tap "Add to Manuscript," the app writes content to the file you chose.
+      This action cannot be automatically undone.
+    </p>
+    <p>
+      <strong>You are solely responsible for maintaining backups of your manuscripts.</strong>
+      If a file is corrupted, overwritten, deleted, or lost — whether due to an
+      app error, a network failure, a Google Drive outage, or any other cause —
+      Handwrite Digitalizer and its developer bear no liability for that loss.
+    </p>
+    <p>
+      <strong>Before using this app with an important manuscript, we strongly recommend
+      creating a backup copy of that file in Google Drive</strong>
+      (right-click → "Make a copy").
+    </p>
+  </div>
+
+  <h2>Limitation of Liability</h2>
+
+  <p>
+    To the maximum extent permitted by applicable law, in no event shall
+    Handwrite Digitalizer or its developer be liable for any indirect, incidental,
+    special, consequential, or punitive damages, including but not limited to:
+  </p>
+  <ul>
+    <li>Loss of data, poems, manuscripts, or creative work</li>
+    <li>Loss of revenue or business opportunity</li>
+    <li>Damage to devices or systems</li>
+    <li>Any other losses arising from use or inability to use the app</li>
+  </ul>
+  <p>
+    This limitation applies regardless of the theory of liability and even if
+    the developer has been advised of the possibility of such damages.
+  </p>
+
+  <h2>Accuracy of Transcription</h2>
+
+  <p>
+    AI transcription is inherently imperfect. The app uses Google Gemini to read
+    handwriting, and results may contain errors, omissions, or misreadings.
+    <strong>Always review and edit transcribed text before saving to your manuscript.</strong>
+    The developer is not responsible for inaccuracies in transcribed content.
+  </p>
+
+  <h2>Acceptable Use</h2>
+
+  <p>You agree not to use this app to:</p>
+  <ul>
+    <li>Transcribe or reproduce content that infringes third-party copyright</li>
+    <li>Violate any applicable law or regulation</li>
+    <li>Abuse or circumvent Google's API terms of service</li>
+  </ul>
+
+  <h2>Governing Law</h2>
+
+  <p>
+    These terms are governed by the laws of the jurisdiction in which the developer
+    resides, without regard to conflict of law principles.
+  </p>
+
+  <a href="./index.html" class="back-link">← Back to app</a>
+</div>
+
+</body>
+</html>
