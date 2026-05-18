@@ -12,7 +12,7 @@ import { initUpload, getFiles, clearFiles }         from './upload.js';
 import { transcribeImages }                          from './transcribe.js';
 import { initEditor, loadPage, getCurrentText }      from './editor.js';
 import { initStorage, connectDrive, disconnectDrive,
-         listManuscripts, appendToManuscript,
+         openPickerForManuscript, appendToManuscript,
          isDriveConnected, exportLocal }             from './storage.js';
 import { initDrafts, saveDraft, renderHistory }      from './draft.js';
 
@@ -53,15 +53,19 @@ function navigate(screenName) {
 function loadSavedSettings() {
   const key      = localStorage.getItem('gemini_key') || '';
   const clientId = localStorage.getItem('drive_client_id') || '';
+  const apiKey   = localStorage.getItem('drive_api_key') || '';
   const msId     = localStorage.getItem('manuscript_id') || '';
   const msName   = localStorage.getItem('manuscript_name') || '';
   const msMime   = localStorage.getItem('manuscript_mime') || '';
 
   if (key)      document.getElementById('gemini-key').value      = key;
   if (clientId) document.getElementById('drive-client-id').value = clientId;
+  if (apiKey)   document.getElementById('drive-api-key').value   = apiKey;
 
   if (msId) {
     state.manuscript = { id: msId, name: msName, mimeType: msMime };
+    const el = document.getElementById('manuscript-selected-name');
+    if (el) el.textContent = `📄 ${msName}`;
   }
 }
 
@@ -87,9 +91,16 @@ function bindEvents() {
     showToast('Client ID saved ✓');
   });
 
+  document.getElementById('btn-save-api-key').addEventListener('click', () => {
+    const val = document.getElementById('drive-api-key').value.trim();
+    if (!val) return alert('Please paste your Google API Key.');
+    localStorage.setItem('drive_api_key', val);
+    showToast('API Key saved ✓');
+  });
+
   document.getElementById('btn-connect-drive').addEventListener('click', handleConnectDrive);
   document.getElementById('btn-disconnect-drive').addEventListener('click', handleDisconnectDrive);
-  document.getElementById('btn-save-manuscript').addEventListener('click', handleSaveManuscript);
+  document.getElementById('btn-pick-manuscript').addEventListener('click', handlePickManuscript);
 
   document.getElementById('btn-start').addEventListener('click', () => {
     const key = localStorage.getItem('gemini_key');
@@ -146,7 +157,6 @@ async function handleConnectDrive() {
   try {
     await connectDrive(clientId);
     showToast('Google Drive connected ✓');
-    await populateManuscriptList();
   } catch (err) {
     alert(`Connection failed: ${err.message}`);
   } finally {
@@ -161,38 +171,26 @@ function handleDisconnectDrive() {
     '<option value="">— Not connected —</option>';
 }
 
-async function populateManuscriptList() {
-  const select = document.getElementById('manuscript-select');
-  select.innerHTML = '<option value="">Loading…</option>';
+async function handlePickManuscript() {
+  const apiKey = localStorage.getItem('drive_api_key');
+  if (!apiKey) {
+    alert('Please save your Google API Key in settings first.');
+    document.getElementById('drive-api-key').focus();
+    return;
+  }
 
   try {
-    const files = await listManuscripts();
-    select.innerHTML = '<option value="">— Choose a manuscript —</option>';
-    files.forEach(f => {
-      const opt = document.createElement('option');
-      opt.value        = f.id;
-      opt.textContent  = f.name;
-      opt.dataset.mime = f.mimeType;
-      // Pre-select the saved default
-      if (f.id === state.manuscript.id) opt.selected = true;
-      select.appendChild(opt);
-    });
+    const file = await openPickerForManuscript(apiKey);
+    state.manuscript = { id: file.id, name: file.name, mimeType: file.mimeType };
+    localStorage.setItem('manuscript_id',   file.id);
+    localStorage.setItem('manuscript_name', file.name);
+    localStorage.setItem('manuscript_mime', file.mimeType);
+
+    document.getElementById('manuscript-selected-name').textContent = `📄 ${file.name}`;
+    showToast(`Manuscript set: ${file.name}`);
   } catch (err) {
-    select.innerHTML = '<option value="">— Error loading files —</option>';
-    console.error(err);
+    if (err.message !== 'cancelled') alert(`Could not pick file: ${err.message}`);
   }
-}
-
-function handleSaveManuscript() {
-  const select = document.getElementById('manuscript-select');
-  const opt    = select.options[select.selectedIndex];
-  if (!opt?.value) return alert('Please select a manuscript first.');
-
-  state.manuscript = { id: opt.value, name: opt.text, mimeType: opt.dataset.mime };
-  localStorage.setItem('manuscript_id',   state.manuscript.id);
-  localStorage.setItem('manuscript_name', state.manuscript.name);
-  localStorage.setItem('manuscript_mime', state.manuscript.mimeType);
-  showToast(`Default manuscript: ${state.manuscript.name}`);
 }
 
 // ─── Transcription Flow ───────────────────────────────────

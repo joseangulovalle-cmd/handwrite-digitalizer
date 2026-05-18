@@ -15,6 +15,8 @@
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <!-- Google Identity Services: handles Google OAuth in-browser without a backend -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Google API (gapi): needed to load the Google Picker file selector -->
+  <script src="https://apis.google.com/js/api.js" async defer></script>
 </head>
 <body>
 
@@ -58,9 +60,17 @@
                  autocomplete="off" spellcheck="false">
           <button id="btn-save-drive-id" class="btn-secondary">Save</button>
         </div>
+
+        <label for="drive-api-key" style="margin-top:12px">Google API Key</label>
+        <div class="input-row">
+          <input type="text" id="drive-api-key"
+                 placeholder="AIzaSy..."
+                 autocomplete="off" spellcheck="false">
+          <button id="btn-save-api-key" class="btn-secondary">Save</button>
+        </div>
         <p class="hint">
           <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">
-            Create OAuth Client ID at Google Cloud Console →
+            Create both at Google Cloud Console → Credentials →
           </a>
         </p>
 
@@ -73,16 +83,13 @@
 
         <div id="drive-connected-area" class="hidden" style="margin-top:14px">
           <p class="status-ok">✓ Google Drive connected</p>
-          <label for="manuscript-select">Default Manuscript</label>
-          <select id="manuscript-select">
-            <option value="">— Loading your files… —</option>
-          </select>
-          <div style="display:flex; justify-content:space-between; align-items:center">
-            <button id="btn-save-manuscript" class="btn-secondary" style="flex:1; margin-right:8px">
-              Set as Default
-            </button>
-            <button id="btn-disconnect-drive" class="btn-link">Disconnect</button>
-          </div>
+          <p id="manuscript-selected-name" class="hint" style="margin-bottom:10px">
+            No manuscript selected yet
+          </p>
+          <button id="btn-pick-manuscript" class="btn-secondary" style="width:100%;margin-bottom:8px">
+            📄 Pick Manuscript from Drive
+          </button>
+          <button id="btn-disconnect-drive" class="btn-link">Disconnect</button>
         </div>
       </section>
 

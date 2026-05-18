@@ -15,10 +15,9 @@
 const DRIVE_API  = 'https://www.googleapis.com/drive/v3';
 const UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';
 const DOCS_API   = 'https://docs.googleapis.com/v1/documents';
-const DRIVE_SCOPE = [
-  'https://www.googleapis.com/auth/drive',
-  'https://www.googleapis.com/auth/documents'
-].join(' ');
+// drive.file = access ONLY to files the user explicitly picks through the app.
+// This is the narrowest scope possible — the app cannot see any other Drive files.
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 let accessToken  = null;
 let _clientId    = null;
@@ -75,20 +74,45 @@ export function isDriveConnected() {
   return !!accessToken;
 }
 
-// ─── Public: List manuscript files ───────────────────────
+// ─── Public: Google Picker — let user select their manuscript ────────────────
+//
+// Instead of listing ALL files (which requires broad drive access),
+// we open Google's own file picker popup. The user selects one file.
+// drive.file scope then grants access ONLY to that specific file.
+// The user can see exactly what they're granting — nothing hidden.
 
-/**
- * Lists Google Docs and .docx files from the user's Drive.
- * Returns array of { id, name, mimeType }.
- */
-export async function listManuscripts() {
-  const q = encodeURIComponent(
-    "(mimeType='application/vnd.google-apps.document' " +
-    "or mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document') " +
-    "and trashed=false"
-  );
-  const res = await driveGet(`/files?q=${q}&fields=files(id,name,mimeType)&pageSize=50`);
-  return res.files || [];
+export function openPickerForManuscript(apiKey) {
+  return new Promise((resolve, reject) => {
+    if (typeof gapi === 'undefined') {
+      reject(new Error('Google API script not loaded yet — try again in a moment.'));
+      return;
+    }
+
+    gapi.load('picker', () => {
+      const view = new google.picker.DocsView()
+        .setMimeTypes([
+          'application/vnd.google-apps.document',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ].join(','));
+
+      const picker = new google.picker.PickerBuilder()
+        .setTitle('Select your manuscript file')
+        .addView(view)
+        .setOAuthToken(accessToken)
+        .setDeveloperKey(apiKey)
+        .setCallback(data => {
+          if (data.action === google.picker.Action.PICKED) {
+            const f = data.docs[0];
+            resolve({ id: f.id, name: f.name, mimeType: f.mimeType });
+          } else if (data.action === google.picker.Action.CANCEL) {
+            reject(new Error('cancelled'));
+          }
+        })
+        .build();
+
+      picker.setVisible(true);
+    });
+  });
 }
 
 // ─── Public: Append poem ─────────────────────────────────
