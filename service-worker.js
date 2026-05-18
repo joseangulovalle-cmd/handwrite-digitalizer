@@ -1,4 +1,4 @@
-const CACHE = 'poetry-v2';
+const CACHE = 'poetry-v3';
 const ASSETS = [
   './',
   './index.html',

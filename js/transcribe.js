@@ -7,7 +7,7 @@
 
 import { fileToBase64, fileToObjectURL } from './upload.js';
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
 
 const PROMPT = `You are transcribing handwritten poetry.
 Transcribe the handwritten text in this image exactly as written.
