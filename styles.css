@@ -594,6 +594,12 @@ select {
   background: var(--surface);
   flex-shrink: 0;
 }
+.footer-secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 
 /* ─── Draft History Drawer ───────────────────────────── */
 .drawer {

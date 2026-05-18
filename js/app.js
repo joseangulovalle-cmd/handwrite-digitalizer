@@ -128,6 +128,8 @@ function bindEvents() {
   document.getElementById('btn-prev-page').addEventListener('click', () => changePage(-1));
   document.getElementById('btn-next-page').addEventListener('click', () => changePage(1));
   document.getElementById('btn-save-draft').addEventListener('click', handleSaveDraft);
+  document.getElementById('btn-copy-text').addEventListener('click', handleCopyText);
+  document.getElementById('btn-share-text').addEventListener('click', handleShareText);
   document.getElementById('btn-add-manuscript').addEventListener('click', handleAddToManuscript);
 
   // ── Success overlay ───────────────────────────────────
@@ -283,6 +285,50 @@ function loadDraftIntoEditor(draft) {
   navigate('edit');
   refreshEditorPage();
   updatePageNav();
+}
+
+// ─── Copy & Share ─────────────────────────────────────────
+
+async function handleCopyText() {
+  const text = getCurrentText();
+  if (!text.trim()) return showToast('Nothing to copy yet');
+
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Copied to clipboard ✓');
+  } catch {
+    // Fallback for browsers/contexts that block the Clipboard API
+    const el    = document.createElement('textarea');
+    el.value    = text;
+    el.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('Copied ✓');
+  }
+}
+
+async function handleShareText() {
+  const text  = getCurrentText();
+  if (!text.trim()) return showToast('Nothing to share yet');
+
+  const title = text.split('\n')[0]?.slice(0, 60) || 'My Poem';
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text });
+      // navigator.share resolves when the user completes the share
+      // If they cancel, it throws an AbortError — that's fine, do nothing
+    } catch (err) {
+      if (err.name !== 'AbortError') showToast('Share failed');
+    }
+  } else {
+    // Desktop browsers that don't support Web Share API yet
+    // Fall back to clipboard + inform the user
+    await handleCopyText();
+    showToast('Copied — paste into your email or chat');
+  }
 }
 
 // ─── Add to Manuscript ────────────────────────────────────
