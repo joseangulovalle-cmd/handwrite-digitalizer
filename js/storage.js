@@ -17,7 +17,7 @@ const UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';
 const DOCS_API   = 'https://docs.googleapis.com/v1/documents';
 // drive.file = access ONLY to files the user explicitly picks through the app.
 // This is the narrowest scope possible — the app cannot see any other Drive files.
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
 
 let accessToken  = null;
 let _clientId    = null;
@@ -198,9 +198,14 @@ async function appendToGoogleDoc(docId, text, title) {
  */
 async function appendToDocx(fileId, text, title) {
   // 1. Download the file as ArrayBuffer
-  const arrayBuf = await fetch(`${DRIVE_API}/files/${fileId}?alt=media`, {
+  const dlRes = await fetch(`${DRIVE_API}/files/${fileId}?alt=media`, {
     headers: { Authorization: `Bearer ${accessToken}` }
-  }).then(r => r.arrayBuffer());
+  });
+  if (!dlRes.ok) {
+    const err = await dlRes.json().catch(() => ({}));
+    throw new Error(`Drive download error: ${err?.error?.message || `HTTP ${dlRes.status}`}`);
+  }
+  const arrayBuf = await dlRes.arrayBuffer();
 
   // 2. Open the ZIP with JSZip (loaded via CDN in index.html)
   const zip     = new JSZip();           // JSZip is a global from CDN
