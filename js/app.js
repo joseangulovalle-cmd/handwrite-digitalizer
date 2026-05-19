@@ -159,6 +159,8 @@ async function handleConnectDrive() {
   try {
     await connectDrive(clientId);
     showToast('Google Drive connected ✓');
+    document.getElementById('drive-connect-area').classList.add('hidden');
+    document.getElementById('drive-connected-area').classList.remove('hidden');
     startSessionTimer();
   } catch (err) {
     alert(`Connection failed: ${err.message}`);
@@ -170,8 +172,8 @@ async function handleConnectDrive() {
 
 function handleDisconnectDrive() {
   disconnectDrive();
-  document.getElementById('manuscript-select').innerHTML =
-    '<option value="">— Not connected —</option>';
+  document.getElementById('drive-connect-area').classList.remove('hidden');
+  document.getElementById('drive-connected-area').classList.add('hidden');
 }
 
 async function handlePickManuscript() {
